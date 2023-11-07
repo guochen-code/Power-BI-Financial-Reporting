@@ -19,4 +19,62 @@ CALCULATE( SUM( 'Cash Flow Data'[Cash Flow Values] ),
 ''' we can filter by year from Date table""
 
 *********************************************************************************** subtotals
+Cash paid for - Financing =
+CALCULATE( [Cash Flow Values],
+      FILTER( 'Cash Flow Data',
+              'Cash Flow Data'[Cash FLow Category] = "Cash paid for" &&
+              'Cash Flow Data'[Cash Flow Type] = "Financing Activities" ))
+
+Cash paid for - Investing
+Cash paid for - Operations
+Cash Receipts From - Financing
+Cash Receipts From - Investing
+Cash Receipts From - Operations
+Net Cash Flow - Financing
+Net Cash Flow - Investing
+Net Cash Flow - Operations
+
+Cash At Start of Year = 
+CALCULATE( [Cash Flow Values], 
+            FILTER( 'Cash Flow Data',
+                    'Cash Flow Data'[Cash Flow Sub Category] = "Cash at Beginning of Year") )
+
+*********************************************************************************** switch/true logic
+C/F Values =
+VAR CurrentItem = SELECTEDVALUE( 'Cash Flow Template'[Cash Flow Normalized] )
+
+RETURN
+SWITCH( True(),
+        CurrentItem = "Net Cash Flow From Operations", [Net Cash Flow - Operations],
+        CurrentItem = "Net Cash Flow From Investing Activities", [Net Cash Flow - Investing],
+        CurrentItem = "Net Cash Flow From Financing Activities", [Net Cash Flow - Financing],
+        CurrentItem = "Net Increase in Cash", [Net Cash Flow - Operations] + [Net Cash Flow - Investing] + [Net Cash Flow - Financing],
+        CurrentItem = "Cash at Beginning of Year", [Cash At Start of Year],
+        CurrentItem = "Cash at End of Year", [Cash At Start of Year] + ( [Net Cash Flow - Operations] + [Net Cash Flow - Investing] + [Net Cash Flow - Financing] ),
+            CALCULATE( [Cash Flow Values], FILTER( 'Cash Flow Data', 'Cash Flow Data'[Cash Flow Sub Category] = CurrentItem ) ) )
+
+*********************************************************************************** use matrix to break out values
+column headers - Values - Row headers - stepped layout off - word wrap off
+subtotals - Row subtotals off
+
+Rows: - row index - cash flow items
+Columns: year
+Values: C/F Values
+
+subtotals - Column subtotals off
+
+select part of the table - copy the table to the right side - drag normalized items to the box indicating "Add data fields here"
+
+*********************************************************************************** visualization
+pie chart cannot use negative values
+
+Measure
+Absolute C/F Values = 
+ABS( [Cash Flow Values])
+
+
+
+
+
+
 
