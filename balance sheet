@@ -1,0 +1,112 @@
+unpivot Balance Sheet Data
+
+column name:
+Balance Sheet Type - Category - Sub Category - Year - Balance Sheet Values
+
+****************************************************************************************************************************************************************************************************
+create a new measure group 
+Home - Enter Data - Name: Balance Sheet Analysis - click Load
+
+! use treatas function to avoid many to many relationships while still filterable
+- Measure
+BS Values = 
+CALCULATE( SUM( 'Balance Sheet Data'[Balance Sheet Values] ),
+  TREATAS( VALUES( Dates[Year] ), 'Balance Sheet Data'[Year] ) )
+''' this result can be filtered by which year'''
+'''acts like drawing a line between Dates and Balanec Sheet Data Tables without having a physical line in data modeling'''
+
+****************************************************************************************************************************************************************************************************
+- Measures
+BS Values = 
+CALCULATE( SUM('Balance Sheet Data'[Balance Sheet Values]),
+  TREATAS( VALUES(Dates[Year]), 'Balance Sheet Data'[Year]))
+''' The TREATAS function applies the values obtained from the previous step as if they were direct filters on the specified column, which is 'Balance Sheet Data'[Year].
+Essentially, it temporarily filters the 'Balance Sheet Data' table, making it behave as if only the selected years from the 'Dates' table were present in the filter context.'''
+
+- Measure
+Current Assets = 
+CALCULATE([BS values], 'Balance Sheet Data'[Category] = "Current Assets")
+'''the total of 'Balance Sheet Values' specifically for the rows in the 'Balance Sheet Data' table where the 'Category' is set to "Current Assets". '''
+'''This allows you to isolate and analyze the current assets portion of your balance sheet data. like filter'''
+'''This might be a sum, an average, or any other aggregation'''
+
+- Measure
+Current Liabilities = 
+CALCULATE([BS values], 'Balance Sheet Data'[Category] = "Current Liabilities")
+
+..........
+..........
+
+- Measure
+Total Assets = [Current Assets] + [Fixed Assets] + [Other Assets]
+
+- Measure
+Liabilities and Owner Equity = 
+[Current Liabilities] + [Long-Term Liabilities] + [Owners Equity]
+
+****************************************************************************************************************************************************************************************************
+
+B/S Values = 
+VAR CurrentItem = SELECTEDVALUE( *Balance Sheet Template' (Balance sheet Normalized] )
+
+RETURN
+SWITCH( TRUE0),
+  CurrentItem = "Total current assets", [Current Assets],
+  CurrentItem = "Total Fixed Assets", (Fixed Assets],
+  CurrentItem = "Total Other Assets", [Other Assets],
+  CurrentItem = "Total Assets", [Total Assets],
+  CurrentItem = "Total Current Liabilities", [Current Liabilities],
+  CurrentItem = "Total Long-Term Liabilities", [Long-Term Liabilities],
+  CurrentItem = "Total Owner's Equity", [Owners Equity],
+  CurrentItem = "Total Liabilities and Owner's Equity", [Liabilities and Owners Equity],
+  CurrentItem = "Debt Ratio (Total Liabilities / Total Assets)", FORMAT( DIVIDE( [Total Liabilities], (Total Assets], 0), "0.00" ),
+  CurrentItem = "Current Ratio (Current Assets / Current Liabilities)", FORMAT( DIVIDE( [Current Assets], [Total Assets], 0), "0.00" ),
+  CurrentItem = "Working Capital (Current Assets - Current Liabilities)", FORMAT( [Current Assets] - [Current Liabilities], "0"),
+  CurrentItem = "Assets-to-Equity Ratio (Total Assets / Owner's Equity)", FORMAT( DIVIDE( [Total Assets], [Owners Equity], 0 ), "0.00" ),
+  CurrentItem= "Debt-to-Equity Ratio (Total Liabilities / Owner's Equity)", FORMAT( DIVIDE( (Total Liabilities], [Owners Equity], 0), "0.00" ),
+      CALCULATE ( [BS Values], FILTER( 'Balance Sheet Data', 'Balance Sheet Data' (Sub Category] = CurrentItem)))
+
+
+****************************************************************************************************************************************************************************************************
+
+table to matrix
+
+adjust format
+
+can have breakdown of balance sheet per year
+
+
+
+****************************************************************************************************************************************************************************************************
+trick to select part of the table
+use filters - add data filters here - use Balance Sheet Normalized
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
