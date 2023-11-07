@@ -1,0 +1,22 @@
+*********************************************************************************** set up
+cashflow template
+- cash flow item
+- row index (show items with no data)
+
+adjust format
+- column headers - word wrap off
+- values - word wrap off
+
+smash row index column on the table
+*********************************************************************************** virtual relationship
+new measure group -> Enter data
+
+create a virtual relationship between tables !!!! ''' we can filter by year from Date table""
+new measure
+Cash Flow Values = 
+CALCULATE( SUM( 'Cash Flow Data'[Cash Flow Values] ),
+  TREATAS( VALUES( Date[Year] ), 'Cash Flow Data'[Year] ) )
+''' we can filter by year from Date table""
+
+*********************************************************************************** subtotals
+
