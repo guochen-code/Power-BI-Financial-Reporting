@@ -2,8 +2,60 @@ lookup table
 fact table
 supporting table
 Date table
+******************************************************************************************************************* create date table
+create Date table by code:
+copy date table code - home - new source - blank query - advanced editor - paste code
+window pops out - request to input StartDate, EndDate and FYStartMonth
 
+******************************************************************************************************************* group tables
+still in data transformation before load tables into power bi
+check column names in tables
+check data types for columns in tables
 
+add new column
+Add Column - Column From Examples - Q1 - change column name to Quarters
+******************************************************************************************************************* unpivot
+pivoted raw tables are useless in power bi
 
+Transform - Use First Row as Headers
 
-union
+select columns you want to maintain and right click and click Unpivot Other Columns
+
+after unpivot, in the table, we will have column Year, not filter this table by the column in the table but by another table which is date table
+so need a column in this table to link up with date table
+
+******************************************************************************************************************* inactive relationship
+invocie table has two columns that are both date
+link date table with these two columns separately, and one would be active relationship, and make it inactive why??? aged trial balance
+
+******************************************************************************************************************* many to many
+cash flow data table year column links to date table year column
+This relationship has cardinality Many-Many. This should only be used if it is expected that neither column (Year and Year)
+contains unique values, and that the significantly different behaviour of Many-many relationships is understood.
+
+avoid this kind of relationships, instead, we can create virutal relationship by Dax to achieve what we want
+
+******************************************************************************************************************* union two tables
+combine sales and company expenses tables together into one table, which contains all the info we need to build income statement
+
+measure
+Total Sales = SUM( Sales[Revenue])
+
+how to roll up revenue, we have different segments of revenue?
+how many revenue per month per channel?
+
+create a new table (to be similar to expense table)
+Channel Revenues = 
+SUMMARIZE( Sales, Sales[Channel], Dates[Month&Year],
+    "Category", "Revenue",
+    "First Date", MIN( Dates[Date]),
+    "Sales Values", [Total Sales])
+
+combine:
+create another new table
+Income Statement Data = 
+UNION('Company Expenses', 
+      SUMMARIZE( ' Channel Revenues', 'Channel Revenues'[Channel], 'Channel Revenues'[Category], 'Channel Revenues'[First Date], 'Channel Revenues[Sales Values]))
+
+key takeaway: you need to find a way to integrate all of that information that in particular statement into the same table
+simpler to put it into our template later
