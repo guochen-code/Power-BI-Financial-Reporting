@@ -41,6 +41,11 @@ combine sales and company expenses tables together into one table, which contain
 measure
 Total Sales = SUM( Sales[Revenue])
 
+????????? [
+what is this :
+Sales LY = CALCULATE( [Total Sales], DATEADD(Dates[Date], -1, YEAR) )
+]
+
 how to roll up revenue, we have different segments of revenue?
 how many revenue per month per channel?
 
@@ -59,3 +64,30 @@ UNION('Company Expenses',
 
 key takeaway: you need to find a way to integrate all of that information that in particular statement into the same table
 simpler to put it into our template later
+
+******************************************************************************************************************* iterating DAX function
+you have unit price and unit amount and you want calculate total amount, don't use calculated column
+use measure:
+Total Costs =
+SUMX(Sales,
+    Sales[Order Quantity], * Sales[Total Unit Cost])
+'''this is iterative function, iterate through every row'''
+
+other DAX:
+Profit Margin = 
+DIVDE([Total Profits], [Total Sales], 0)
+
+Profit LY = 
+CALCULATE( [Total Profits],
+            SAMEPERIODLASTYEAR( Dates[Date]) )
+
+Sales TY vs LY = [Total Sales] - [Sales LY] # [Total Sales] is Sales this year
+
+Sales Year to Date = 
+CALCULATE(
+        [Total Sales],
+            DATEYTD( Dates[Date]) )
+
+
+
+
