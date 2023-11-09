@@ -17,4 +17,18 @@ Income Values = SUM( 'Income Statement Data'[Values] )
 ****************************************************************************************************************** positive & negative
 revenues and expenses are all positive numbers
 
+measure
+Actuals (,000) = 
+VAR Revenue = CALCULATE( [Income Values], 'Income Statement Data'[Type] = "Revenues")
+VAR Expense = CALCULATE( [Income Values], 'Income Statement Data'[Type] = "Expenses") * -1
+
+Return
+DVIDE(
+IF( SELECTEDVALUE( 'Income Statement Data'[Type] = "Revenues", Revenue,
+    IF( SELECTEDVALUE(' Income Statement Data'[Type] = "Expenses", Expense,
+        Revenue + Expense ) ), 1000, 0 )
+
+
+
+
 
