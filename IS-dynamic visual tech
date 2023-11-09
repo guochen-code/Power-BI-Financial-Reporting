@@ -1,3 +1,4 @@
+********************************************************************************************************************************** filter through different perspectives
 what we have:
 3 independent measures:
 (1) Actuals (selected year actuals)
@@ -15,3 +16,12 @@ SWITCH( TRUE(),
     [Table Data] = "% to Revenue", [TY vs PY Actuals %],
       Blank() ) 
 # Blank() here ensure always be something
+
+********************************************************************************************************************************** break down to quarters
+new measure
+Q1 = CALCULATE( [Annual Totals], Dates[Quarters] = "Q1" )
+Q2 = CALCULATE( [Annual Totals], Dates[Quarters] = "Q2" )
+Q3 = CALCULATE( [Annual Totals], Dates[Quarters] = "Q3" )
+Q4 = CALCULATE( [Annual Totals], Dates[Quarters] = "Q4" )
+
+
