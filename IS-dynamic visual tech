@@ -1,0 +1,17 @@
+what we have:
+3 independent measures:
+(1) Actuals (selected year actuals)
+(2) vs Last Year (TY vs PY Actuals)
+(3) % to Revenue (TY vs PY Actuals %)
+
+what want to achieve:
+have a filter with multiple options, when choose any of the option, the corresponding column will present in the table
+
+new measure
+Annual Totals = 
+SWITCH( TRUE(),
+    [Table Data] = "Actuals", [Selected Year Actuals],
+    [Table Data] = "vs Last Year", [TY vs PY Actuals],
+    [Table Data] = "% to Revenue", [TY vs PY Actuals %],
+      Blank() ) 
+# Blank() here ensure always be something
