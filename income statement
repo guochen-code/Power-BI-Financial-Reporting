@@ -28,6 +28,107 @@ IF( SELECTEDVALUE( 'Income Statement Data'[Type] = "Revenues", Revenue,
     IF( SELECTEDVALUE(' Income Statement Data'[Type] = "Expenses", Expense,
         Revenue + Expense ) ), 1000, 0 )
 
+****************************************************************************************************************** rollup subtotals
+a lot of measures
+
+****************************************************************************************************************** incorporating financial template - switch true logic
+drag in your template that you want to populate - format messed up ->
+format your visuals - headers & values - wrap word off
+
+associate all the measures into our template
+measure
+Selected Year Actuals =
+VAR CurrentItem = SELECTEDVALUE ( 'Income Statement Template'[Items (Normalized)] )
+
+RETURN
+SWITCHK TRUE (),
+    CurrentItem = "Total Revenues", DIVIDE( (Revenues], 1000, 0 ),
+    CurrentItem = "Total COGS", DIVIDE ( [COGS], 1000, 0 ),
+    CurrentItem = "Total Gross Profit", DIVIDE( [Gross Profit], 1000, 0 ),
+    CurrentItem = "Gross Profit *", FORMAT( [Gross Profit Margin], "0.00%" ),
+    CurrentItem = "Total Other Expenses", DIVIDE( [Other Expenses], 1000, 0 ),
+    CurrentItem = "Total Net Profit", DIVIDE( [Net Profit], 1000, 0 ),
+    CurrentItem = "Net Profit *", FORMAT( [Net Profit Margin]),"0.00%" ),
+        CALCULATE( [Actuals (,000)], FILTER( 'Income Statement Data', "Income Statement Data [Items] = CurrentItem )))
+
+****************************************************************************************************************** table to matrix - can break down all calculations by year
+Row headers - stepped layout off
+Subtotals - Row subtotals off
+Column headers - word wrap off
+Row headers - word wrap off
+Stype - None
+
+****************************************************************************************************************** time comparison
+back to table, not on matrix
+
+recap:
+Revenues = CALCULATE( [Income Values], 'Income Statement Data'[Type] = "Revenues") # calculate on what data and filter on what condition
+
+measure:
+Revenues LY = 
+CALCULATE( [Revenues], DATEADD( Dates[Date], -1, YEAR ) ) # calcualte on Revenues and filter on last year is true
+
+create all measures for COGS LY, Net Profit Margin LY ....... etc.
+create measure Previous Year Actuals (switch true logic), all the same like above except for the last rows:
+    CALCULATE( [Actuals (,000)], FILTER( 'Income Statement Data', "Income Statement Data [Items] = CurrentItem )),
+        DATEADD(Datas[Date], -1, YEAR ) ) )
+
+# NOW, you can compare "Selected Year Actuals" vs "Previous Year Actuals" in a TABLE
+
+****************************************************************************************************************** other template calculations
+not easy to calculate the difference between "Selected Year Actuals" and "Previous Year Actuals", why?????
+
+new measure
+TY vs PY Actuals = 
+[Selected Year Actuals] - [Previous Year Actuals]
+---> error, cannot display the visual.
+reason:
+Gross profit % and Net Profit %, sitting underneath are text values, because "format" we put into the switch true logic
+solution:
+use switch true logic in creation of this measure
+
+Annual Totals = 
+VAR CurrentItem = SELECTEDVALUE( 'Income Statement Template'[Items - Normalized] )
+
+VAR Actuals = SWITCH( TRUE(),
+    CurrentItem = "Total Revenues", DIVIDE( [Revenues], 1000, 0 ),
+    CurrentItem = "Total COGS", DIVIDE( [COGS], 1000, 0 ),
+    CurrentItem = "Total Gross Profit", DIVIDE( [Gross Profit], 1000, 0 ),
+    CurrentItem = "Gross Profit %", FORMAT( [Gross Profit Margin], "0.00%" ),
+    CurrentItem = "Total Other Expenses", DIVIDE( [Expenses], 1000, 0 ),
+    CurrentItem = "Total Net Profit", DIVIDE( [Net Profit], 1000, 0 ),
+    CurrentItem = "Net Profit %", FORMAT( [Net Profit Margin], "0.00%" ),
+        CALCULATE( [Actuals (,000)],
+            FILTER( 'Income Statement', 'Income Statement'[Items] = CurrentItem ) ) )
+
+VAR vsLastYear = SWITCH( TRUE(),
+    CurrentItem = "Total Revenues", DIVIDE( [Revenues] - [Revenue LY], 1000, 0 ),
+    CurrentItem = "Total COGS", DIVIDE( [COGS] - [COGS LY], 1000, 0 ),
+    CurrentItem = "Total Gross Profit", DIVIDE( [Gross Profit] - [Gross Profit LY], 1000, 0 ),
+    CurrentItem = "Total Other Expenses", DIVIDE( [Expenses] - [Expenses LY], 1000, 0 ),
+    CurrentItem = "Total Net Profit", DIVIDE( [Net Profit] - [Net Profit LY], 1000, 0 ),
+        CALCULATE( [Actuals (,000)], FILTER( 'Income Statement', 'Income Statement'[Items] = CurrentItem ) )  ) - 
+        CALCULATE( CALCULATE( [Actuals (,000)], FILTER( 'Income Statement', 'Income Statement'[Items] = CurrentItem ) ), DATEADD( Dates[Date], -1, YEAR ) )
+
+VAR PercentvsRev = SWITCH( TRUE(),
+    CurrentItem = "Total Revenues", FORMAT( 1, "0.00%" ),
+    CurrentItem = "Total COGS", FORMAT( DIVIDE( [COGS], [Revenues], 0 ), "0.00%" ),
+    CurrentItem = "Total Gross Profit", FORMAT( DIVIDE( [Gross Profit], [Revenues], 0 ), "0.00%" ),
+    CurrentItem = "Total Other Expenses", FORMAT( DIVIDE( [Expenses], [Revenues], 0 ),"0.00%" ),
+    CurrentItem = "Total Net Profit", FORMAT( DIVIDE( [Net Profit], [Revenues], 0 ), "0.00%" ),
+        FORMAT( DIVIDE( CALCULATE( [Actuals (,000)]  * 1000,
+            FILTER( 'Income Statement', 'Income Statement'[Items] = CurrentItem ) ), [Revenues], 0 ), "0.00%" ))
+
+RETURN
+SWITCH( TRUE(),
+    [Table Data] = "Actuals", Actuals,
+    [Table Data] = "vs Last Year", vsLastYear,
+    [Table Data] = "% to Revenue", PercentvsRev,
+    BLANK() )
+
+
+
+
 
 
 
