@@ -1,1 +1,20 @@
-income s
+under income statement data group (data page, not report page)
+Column Tools - New Column
+Type = 
+IF( 'Income Statement Data'[Category] = "Revenue", "Revenues", "Expenses")
+
+Column Tools - New Column
+Type Index = 
+IF( 'Income Statement Data'[Category] = "Revenue", 1, 2)
+
+****************************************************************************************************************** start here
+create a new page - income statement
+create a new measure group - enter data -
+
+measure
+Income Values = SUM( 'Income Statement Data'[Values] )
+
+****************************************************************************************************************** positive & negative
+revenues and expenses are all positive numbers
+
+
